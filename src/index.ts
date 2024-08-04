@@ -1,9 +1,10 @@
 import * as fsBase from "node:fs";
+import * as path from "node:path";
 
 const fs = fsBase.promises;
 
-// const data = await fs.readFile(path.join(__dirname, "data.json"), "utf8");
-//
-// console.log(data);
+(async () => {
+  const data = await fs.readFile(path.join(__dirname, "example.txt"), "utf8");
 
-console.log("Hello");
+  console.log(data);
+})();
