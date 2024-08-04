@@ -1,0 +1,33 @@
+{
+  "name": "1_node-course",
+  "version": "1.0.0",
+  "exports": "./index.js",
+  "scripts": {
+    "run": "ts-node ./src/index.ts",
+    "delete_build": "del /q .\\build && del /q .\\types",
+    "generate": "tsc && babel src --out-dir build --config-file ./.babelrc --extensions \".ts\" ",
+    "build": "npm run delete_build && npm run generate"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@babel/node": "^7.25.0",
+    "express": "^4.19.2",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.8",
+    "@babel/core": "^7.25.2",
+    "@babel/plugin-proposal-optional-chaining": "^7.21.0",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/preset-typescript": "^7.24.7",
+    "@types/express": "^4.17.21",
+    "esrun": "^3.2.26",
+    "nodemon": "^3.1.4",
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+  }
+}
