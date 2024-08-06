@@ -1,54 +1,20 @@
-import express from "express";
+import Koa from "koa";
 
-const app = express();
-app.use(express.json());
+const app = new Koa();
 
-app.get("/hello", (req: express.Request, res: express.Response) => {
-  res.status(200).send(`<h1>Hello from express!</h1>`);
+app.use(async (ctx, next) => {
+  ctx.type = "application/json";
+  await next();
 });
 
-interface UserData {
-  name: string;
-}
-
-class User implements UserData {
-  id: string;
-  name: string;
-
-  constructor(id: string, name: string) {
-    this.id = id;
-    this.name = name;
-  }
-}
-
-const users: Array<User> = [
-  { id: "1", name: "Abhiroop" },
-  { id: "2", name: "Rashmi" },
-  { id: "3", name: "Debraj" },
-  { id: "4", name: "Madhu" },
-];
-
-app.get("/users", (req: express.Request, res: express.Response) => {
-  //load user data from database
-  res.status(200).type("application/json").send(users);
+app.use(async (ctx, next) => {
+  ctx.body = { name: "John Doe", id: "123" };
+  await next();
 });
 
-app.get("/users/:id", (req: express.Request, res: express.Response) => {
-  //load user data from database
-  res
-    .status(200)
-    .type("application/json")
-    .send(users.filter((user: User) => user.id === req.params.id));
+app.use(async (ctx, next) => {
+  ctx.cookies.set("trackingId", "123");
+  await next();
 });
 
-app.post("/users", (req: express.Request, res: express.Response) => {
-  const newUserData: UserData = req.body;
-  const newUser = new User((users.length + 1).toString(), newUserData.name);
-  users.push(newUser);
-
-  res.status(201).type("text/plain").send(newUser.id);
-});
-
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
-});
+app.listen(3000, () => console.log("Listening on 3000"));
