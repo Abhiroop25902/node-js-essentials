@@ -1,20 +1,19 @@
-import Koa from "koa";
+import Hapi from "@hapi/hapi";
+import helloRoute from "./helloRoute";
 
-const app = new Koa();
+const routes: Array<Hapi.ServerRoute<Hapi.ServerApplicationState>> = [
+  helloRoute,
+];
 
-app.use(async (ctx, next) => {
-  ctx.type = "application/json";
-  await next();
+const server = Hapi.server({
+  port: 3000,
+  host: "localhost",
 });
 
-app.use(async (ctx, next) => {
-  ctx.body = { name: "John Doe", id: "123" };
-  await next();
+routes.forEach((route) => {
+  server.route(route);
 });
 
-app.use(async (ctx, next) => {
-  ctx.cookies.set("trackingId", "123");
-  await next();
+server.start().then(() => {
+  console.log("Hapi Server is listening on port 3000");
 });
-
-app.listen(3000, () => console.log("Listening on 3000"));
