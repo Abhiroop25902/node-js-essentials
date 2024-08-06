@@ -1,10 +1,24 @@
-import * as fsBase from "node:fs";
-import * as path from "node:path";
+import * as http from "node:http";
 
-const fs = fsBase.promises;
+const server = http.createServer((req, res) => {
+  const { url, method } = req;
 
-(async () => {
-  const data = await fs.readFile(path.join(__dirname, "example.txt"), "utf8");
+  console.log("I received a request");
+  console.log(url);
+  console.log(method);
 
-  console.log(data);
-})();
+  if (url === "/") {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.write("<h1>Home page</h1>");
+  } else if (url === "/about") {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.write("<h1>About page</h1>");
+  } else {
+    res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
+    res.write("<h1>404 Not Found</h1>");
+  }
+
+  res.end();
+});
+
+server.listen(3000, () => console.log("Server listening on port 3000"));
