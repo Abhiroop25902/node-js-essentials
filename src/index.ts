@@ -1,24 +1,54 @@
-import * as http from "node:http";
+import express from "express";
 
-const server = http.createServer((req, res) => {
-  const { url, method } = req;
+const app = express();
+app.use(express.json());
 
-  console.log("I received a request");
-  console.log(url);
-  console.log(method);
-
-  if (url === "/") {
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    res.write("<h1>Home page</h1>");
-  } else if (url === "/about") {
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    res.write("<h1>About page</h1>");
-  } else {
-    res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
-    res.write("<h1>404 Not Found</h1>");
-  }
-
-  res.end();
+app.get("/hello", (req: express.Request, res: express.Response) => {
+  res.status(200).send(`<h1>Hello from express!</h1>`);
 });
 
-server.listen(3000, () => console.log("Server listening on port 3000"));
+interface UserData {
+  name: string;
+}
+
+class User implements UserData {
+  id: string;
+  name: string;
+
+  constructor(id: string, name: string) {
+    this.id = id;
+    this.name = name;
+  }
+}
+
+const users: Array<User> = [
+  { id: "1", name: "Abhiroop" },
+  { id: "2", name: "Rashmi" },
+  { id: "3", name: "Debraj" },
+  { id: "4", name: "Madhu" },
+];
+
+app.get("/users", (req: express.Request, res: express.Response) => {
+  //load user data from database
+  res.status(200).type("application/json").send(users);
+});
+
+app.get("/users/:id", (req: express.Request, res: express.Response) => {
+  //load user data from database
+  res
+    .status(200)
+    .type("application/json")
+    .send(users.filter((user: User) => user.id === req.params.id));
+});
+
+app.post("/users", (req: express.Request, res: express.Response) => {
+  const newUserData: UserData = req.body;
+  const newUser = new User((users.length + 1).toString(), newUserData.name);
+  users.push(newUser);
+
+  res.status(201).type("text/plain").send(newUser.id);
+});
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
