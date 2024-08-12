@@ -1,55 +1,63 @@
-import { MongoClient } from "mongodb";
-import * as fs from "node:fs/promises";
+import mysql, { OkPacket } from "mysql";
+import dotenv from "dotenv";
+import * as fs from "node:fs";
 import * as path from "node:path";
 
+dotenv.config();
+
 interface Product {
-    _id?: number;
+    id?: number;
     name: string;
+    price: number;
 }
 
-async function getProductNamesFromFile(fileName: string): Promise<Product[]> {
-    const fileText = await fs.readFile(fileName, { encoding: "utf8" });
+const connection = mysql.createConnection({
+    host: "localhost",
+    database: "node_course_schema",
+    user: process.env.MY_SQL_USERNM,
+    password: process.env.MY_SQL_PASSWD,
+});
 
-    return fileText.split(",").map((productName) => {
+//synchronous
+connection.connect((err) => {
+    if (err) throw err;
+
+    console.log("Successfully connected to MySQL server");
+});
+
+const productsToAdd: Array<Product> = fs
+    .readFileSync(path.join(__dirname, "new-products.txt"), {
+        encoding: "utf8",
+    })
+    .split("\n")
+    .map((line) => {
+        const [name, priceString] = line.split(",");
         return {
-            name: productName,
+            name: name,
+            price: parseFloat(priceString),
         };
     });
-}
 
-(async () => {
-    const productsToBeAdded = await getProductNamesFromFile(
-        path.join(__dirname, "new-products.txt"),
+productsToAdd.forEach((product) => {
+    connection.query(
+        "INSERT INTO products (name, price) VALUES (?, ?)",
+        [product.name, product.price, product.name, product.price],
+        (err, result: OkPacket) => {
+            if (err) throw err;
+
+            console.log(result);
+        },
     );
+});
 
-    const client = await MongoClient.connect("mongodb://localhost:27017");
-    const db = client.db("node-course-db");
-    const collection = db.collection<Product>("products");
+connection.query(`SELECT * FROM products`, (err, result: Array<Product>) => {
+    if (err) throw err;
 
-    const existingResults = await collection
-        .find({
-            name: { $in: productsToBeAdded.map((e) => e.name) },
-        })
-        .toArray();
+    console.log(result);
+});
 
-    for (const product of productsToBeAdded) {
-        if (existingResults.filter((e) => e.name == product.name).length > 0) {
-            console.log(
-                `Skipping Addition of ${product.name} cause it already exists`,
-            );
-        } else {
-            const result = await collection.insertOne(product);
-            if (!result.acknowledged) {
-                console.error(`Failed to insert ${product.name}!`);
-            } else {
-                console.log(`Successfully inserted ${product.name}!`);
-            }
-        }
-    }
+connection.end((err) => {
+    if (err) throw err;
 
-    const entireData = await collection.find({}).toArray();
-
-    console.log(entireData);
-
-    await client.close();
-})();
+    console.log("Successfully ended connection to MySQL server");
+});

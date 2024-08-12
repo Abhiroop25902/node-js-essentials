@@ -13,9 +13,11 @@
   "description": "",
   "dependencies": {
     "@hapi/hapi": "^21.3.10",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "koa": "^2.15.3",
-    "mongodb": "^6.8.0"
+    "mongodb": "^6.8.0",
+    "mysql": "^2.18.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.8",
@@ -26,6 +28,7 @@
     "@types/express": "^4.17.21",
     "@types/hapi": "^18.0.14",
     "@types/koa": "^2.15.0",
+    "@types/mysql": "^2.15.26",
     "esrun": "^3.2.26",
     "nodemon": "^3.1.4",
     "prettier": "^3.3.3",
