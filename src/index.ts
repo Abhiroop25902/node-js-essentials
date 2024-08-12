@@ -1,19 +1,55 @@
-import Hapi from "@hapi/hapi";
-import helloRoute from "./helloRoute";
+import { MongoClient } from "mongodb";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 
-const routes: Array<Hapi.ServerRoute<Hapi.ServerApplicationState>> = [
-  helloRoute,
-];
+interface Product {
+    _id?: number;
+    name: string;
+}
 
-const server = Hapi.server({
-  port: 3000,
-  host: "localhost",
-});
+async function getProductNamesFromFile(fileName: string): Promise<Product[]> {
+    const fileText = await fs.readFile(fileName, { encoding: "utf8" });
 
-routes.forEach((route) => {
-  server.route(route);
-});
+    return fileText.split(",").map((productName) => {
+        return {
+            name: productName,
+        };
+    });
+}
 
-server.start().then(() => {
-  console.log("Hapi Server is listening on port 3000");
-});
+(async () => {
+    const productsToBeAdded = await getProductNamesFromFile(
+        path.join(__dirname, "new-products.txt"),
+    );
+
+    const client = await MongoClient.connect("mongodb://localhost:27017");
+    const db = client.db("node-course-db");
+    const collection = db.collection<Product>("products");
+
+    const existingResults = await collection
+        .find({
+            name: { $in: productsToBeAdded.map((e) => e.name) },
+        })
+        .toArray();
+
+    for (const product of productsToBeAdded) {
+        if (existingResults.filter((e) => e.name == product.name).length > 0) {
+            console.log(
+                `Skipping Addition of ${product.name} cause it already exists`,
+            );
+        } else {
+            const result = await collection.insertOne(product);
+            if (!result.acknowledged) {
+                console.error(`Failed to insert ${product.name}!`);
+            } else {
+                console.log(`Successfully inserted ${product.name}!`);
+            }
+        }
+    }
+
+    const entireData = await collection.find({}).toArray();
+
+    console.log(entireData);
+
+    await client.close();
+})();
