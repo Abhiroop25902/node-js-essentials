@@ -15,7 +15,7 @@ io.on("connection", (socket) => {
         );
     });
 
-    setInterval(() => {
+    const intervalId = setInterval(() => {
         const data: SocketData = {
             randomNumber: Math.ceil(Math.random() * 100),
         };
@@ -24,11 +24,14 @@ io.on("connection", (socket) => {
         );
         socket.emit("random", data);
     }, 5000);
+    console.log(`Starting setInterval with id ${intervalId}`);
 
     socket.on("disconnect", (disconnectReason) => {
         console.log(
             `Disconnected from ${socket.id} due to ${disconnectReason}`,
         );
+        console.log(`Stopping Interval with id ${intervalId}`);
+        clearInterval(intervalId);
     });
 });
 

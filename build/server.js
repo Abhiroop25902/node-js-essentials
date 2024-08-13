@@ -15,15 +15,18 @@ io.on("connection", function (socket) {
   socket.on("random", function (data) {
     console.log("Received random number from ".concat(socket.id, ": ").concat(data.randomNumber));
   });
-  setInterval(function () {
+  var intervalId = setInterval(function () {
     var data = {
       randomNumber: Math.ceil(Math.random() * 100)
     };
     console.log("Sending random number ".concat(data.randomNumber, " to ").concat(socket.id));
     socket.emit("random", data);
   }, 5000);
+  console.log("Starting setInterval with id ".concat(intervalId));
   socket.on("disconnect", function (disconnectReason) {
     console.log("Disconnected from ".concat(socket.id, " due to ").concat(disconnectReason));
+    console.log("Stopping Interval with id ".concat(intervalId));
+    clearInterval(intervalId);
   });
 });
 server.listen(8000, function () {
