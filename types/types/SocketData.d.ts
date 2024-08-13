@@ -1,0 +1,3 @@
+interface SocketData {
+    randomNumber: number;
+}

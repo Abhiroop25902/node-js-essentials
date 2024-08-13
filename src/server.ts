@@ -7,14 +7,28 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 io.on("connection", (socket) => {
-    console.log(`Connected to: ${socket.client}`);
+    console.log(`Connected to: ${socket.id}`);
 
-    socket.on("someEvent", () => {
-        socket.emit("someOtherEvent", { message: "Hello!" });
+    socket.on("random", (data: SocketData) => {
+        console.log(
+            `Received random number from ${socket.id}: ${data.randomNumber}`,
+        );
     });
 
-    socket.on("disconnect", (socket) => {
-        console.log(`Disconnected from ${socket}`);
+    setInterval(() => {
+        const data: SocketData = {
+            randomNumber: Math.ceil(Math.random() * 100),
+        };
+        console.log(
+            `Sending random number ${data.randomNumber} to ${socket.id}`,
+        );
+        socket.emit("random", data);
+    }, 5000);
+
+    socket.on("disconnect", (disconnectReason) => {
+        console.log(
+            `Disconnected from ${socket.id} due to ${disconnectReason}`,
+        );
     });
 });
 
