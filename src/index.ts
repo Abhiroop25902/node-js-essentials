@@ -1,7 +1,9 @@
-export const getPropertyWithDefault = <O extends Object, K extends keyof O>(
-    propertyName: K,
-    defaultValue: O[K],
-    obj: O,
-): O[K] => {
-    return propertyName in obj ? obj[propertyName] : defaultValue;
-};
+import express from "express";
+
+const app = express();
+
+app.get("/hello", (req: express.Request, res: express.Response) => {
+    res.status(200).type("application/json").send('{"status": "success"}');
+});
+
+export { app };
